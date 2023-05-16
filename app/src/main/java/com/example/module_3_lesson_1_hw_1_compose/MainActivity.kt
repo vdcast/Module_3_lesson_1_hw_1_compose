@@ -126,7 +126,10 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                             ),
                             onClick = {
 
-                                DbThread(task.id, callbackUpdatedTask)
+                                if (!isEditing.value){
+                                    DbThread(task.id, callbackUpdatedTask)
+                                }
+
 
 
                             }
@@ -168,7 +171,6 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     }
                                                 ),
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
                                                     .padding(start = 24.dp),
                                                 textStyle = TextStyle(fontSize = 16.sp)
                                             )
@@ -199,7 +201,6 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     }
                                                 ),
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
                                                     .padding(start = 24.dp),
                                                 textStyle = TextStyle(fontSize = 16.sp)
                                             )
@@ -225,15 +226,18 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
 
 
 
+                                    if (!isEditing.value){
+                                        Image(
+                                            painter = painterResource(id = R.drawable.flag_6464),
+                                            contentDescription = "flag",
+                                            modifier = Modifier
+                                                .alpha(if (task.flagged) 1f else 0f)
+                                                .size(48.dp)
+                                                .weight(0.2f)
+                                        )
+                                    }
 
-                                    Image(
-                                        painter = painterResource(id = R.drawable.flag_6464),
-                                        contentDescription = "flag",
-                                        modifier = Modifier
-                                            .alpha(if (task.flagged) 1f else 0f)
-                                            .size(48.dp)
-                                            .weight(0.2f)
-                                    )
+
 
                                     if (isEditing.value) {
                                         Column() {
@@ -242,7 +246,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 contentDescription = "edit",
                                                 modifier = Modifier
                                                     .size(32.dp)
-                                                    .offset(x = (-24).dp)
+                                                    .offset(x = (-24).dp, y = 8.dp)
                                                     .weight(0.2f)
                                                     .clickable {
                                                         isEditing.value = false
@@ -272,7 +276,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 contentDescription = "edit",
                                                 modifier = Modifier
                                                     .size(32.dp)
-                                                    .offset(x = (-24).dp)
+                                                    .offset(x = (-24).dp, y = (-8).dp)
                                                     .weight(0.2f)
                                                     .clickable {
                                                         isEditing.value = false
@@ -300,6 +304,8 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 .weight(0.2f)
                                                 .clickable {
                                                     isEditing.value = true
+                                                    textFieldValueTitle.value = task.title
+                                                    textFieldValueDescription.value = task.description
                                                 },
 
 
