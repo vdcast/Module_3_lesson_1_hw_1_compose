@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -109,6 +110,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                         val textFieldValueTitleState = remember { mutableStateOf(task.title) }
                         val textFieldValueDescriptionState = remember { mutableStateOf(task.description) }
 
+                        val focusManager = LocalFocusManager.current
 
                         Card(
                             modifier = Modifier
@@ -123,13 +125,10 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                 if (task.flagged) Mint40 else Mint10
                             ),
                             onClick = {
-
                                 if (!isEditingState.value){
                                     DbThread(task.id, callbackUpdatedTask)
                                 }
-
-
-
+                                focusManager.clearFocus()
                             }
                         ) {
                             Box(){
@@ -143,6 +142,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         if (isEditingState.value) {
+
                                             TextField(
                                                 value = textFieldValueTitleState.value,
                                                 onValueChange = {newValue ->
@@ -154,7 +154,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 ),
                                                 keyboardActions = KeyboardActions(
                                                     onDone = {
-
+                                                        focusManager.clearFocus()
                                                     }
                                                 ),
                                                 modifier = Modifier
@@ -173,7 +173,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 ),
                                                 keyboardActions = KeyboardActions(
                                                     onDone = {
-
+                                                        focusManager.clearFocus()
                                                     }
                                                 ),
                                                 modifier = Modifier
