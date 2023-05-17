@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -107,15 +105,15 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                     itemsIndexed(tasksState.value){ index, task ->
 
 
-                        val isEditing = remember { mutableStateOf(false) }
-                        val textFieldValueTitle = remember { mutableStateOf(task.title) }
-                        val textFieldValueDescription = remember { mutableStateOf(task.description) }
+                        val isEditingState = remember { mutableStateOf(false) }
+                        val textFieldValueTitleState = remember { mutableStateOf(task.title) }
+                        val textFieldValueDescriptionState = remember { mutableStateOf(task.description) }
 
 
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(if (isEditing.value) 192.dp else 96.dp)
+                                .height(if (isEditingState.value) 192.dp else 96.dp)
                                 .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(
@@ -126,7 +124,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                             ),
                             onClick = {
 
-                                if (!isEditing.value){
+                                if (!isEditingState.value){
                                     DbThread(task.id, callbackUpdatedTask)
                                 }
 
@@ -144,11 +142,11 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                     Column (
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        if (isEditing.value) {
+                                        if (isEditingState.value) {
                                             TextField(
-                                                value = textFieldValueTitle.value,
+                                                value = textFieldValueTitleState.value,
                                                 onValueChange = {newValue ->
-                                                    textFieldValueTitle.value = newValue
+                                                    textFieldValueTitleState.value = newValue
 
                                                 },
                                                 keyboardOptions = KeyboardOptions(
@@ -156,18 +154,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 ),
                                                 keyboardActions = KeyboardActions(
                                                     onDone = {
-//                                                        isEditing.value = false
-//                                                        tasksState.value[index].title = textFieldValueTitle.value
-//
-//                                                        runBlocking {
-//                                                            launch(Dispatchers.IO){
-//                                                                updateTitle(
-//                                                                    task.id,
-//                                                                    textFieldValueTitle.value
-//                                                                )
-//                                                                updateTasksState()
-//                                                            }
-//                                                        }
+
                                                     }
                                                 ),
                                                 modifier = Modifier
@@ -176,9 +163,9 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                             )
 
                                             TextField(
-                                                value = textFieldValueDescription.value,
+                                                value = textFieldValueDescriptionState.value,
                                                 onValueChange = {newValue ->
-                                                    textFieldValueDescription.value = newValue
+                                                    textFieldValueDescriptionState.value = newValue
 
                                                 },
                                                 keyboardOptions = KeyboardOptions(
@@ -186,18 +173,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 ),
                                                 keyboardActions = KeyboardActions(
                                                     onDone = {
-//                                                        isEditing.value = false
-//                                                        tasksState.value[index].description = textFieldValueDescription.value
-//
-//                                                        runBlocking {
-//                                                            launch(Dispatchers.IO){
-//                                                                updateDescription(
-//                                                                    task.id,
-//                                                                    textFieldValueDescription.value
-//                                                                )
-//                                                                updateTasksState()
-//                                                            }
-//                                                        }
+
                                                     }
                                                 ),
                                                 modifier = Modifier
@@ -210,7 +186,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 text = tasksState.value[index].title,
                                                 modifier = Modifier
                                                     .padding(start = 32.dp),
-                                                style = TextStyle(fontSize = 16.sp)
+                                                style = TextStyle(fontSize = 16.sp),
                                             )
                                             Text(
                                                 text = tasksState.value[index].description,
@@ -225,8 +201,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                     }
 
 
-
-                                    if (!isEditing.value){
+                                    if (!isEditingState.value){
                                         Image(
                                             painter = painterResource(id = R.drawable.flag_6464),
                                             contentDescription = "flag",
@@ -239,7 +214,7 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
 
 
 
-                                    if (isEditing.value) {
+                                    if (isEditingState.value) {
                                         Column() {
                                             Image(
                                                 painter = painterResource(id = R.drawable.done),
@@ -249,17 +224,22 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     .offset(x = (-24).dp, y = 8.dp)
                                                     .weight(0.2f)
                                                     .clickable {
-                                                        isEditing.value = false
+                                                        isEditingState.value = false
 
-                                                        tasksState.value[index].title = textFieldValueTitle.value
-                                                        tasksState.value[index].description = textFieldValueDescription.value
+                                                        tasksState.value[index].title =
+                                                            textFieldValueTitleState.value
+                                                        tasksState.value[index].description =
+                                                            textFieldValueDescriptionState.value
 
                                                         runBlocking {
-                                                            launch(Dispatchers.IO){
-                                                                updateTitle(task.id,textFieldValueTitle.value)
+                                                            launch(Dispatchers.IO) {
+                                                                updateTitle(
+                                                                    task.id,
+                                                                    textFieldValueTitleState.value
+                                                                )
                                                                 updateDescription(
                                                                     task.id,
-                                                                    textFieldValueDescription.value
+                                                                    textFieldValueDescriptionState.value
                                                                 )
                                                                 updateTasksState()
                                                             }
@@ -279,10 +259,10 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     .offset(x = (-24).dp, y = (-8).dp)
                                                     .weight(0.2f)
                                                     .clickable {
-                                                        isEditing.value = false
+                                                        isEditingState.value = false
 
                                                         runBlocking {
-                                                            launch(Dispatchers.IO){
+                                                            launch(Dispatchers.IO) {
 
                                                                 deleteTask(task.id)
                                                                 updateTasksState()
@@ -303,9 +283,10 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 .offset(x = (-8).dp)
                                                 .weight(0.2f)
                                                 .clickable {
-                                                    isEditing.value = true
-                                                    textFieldValueTitle.value = task.title
-                                                    textFieldValueDescription.value = task.description
+                                                    isEditingState.value = true
+                                                    textFieldValueTitleState.value = task.title
+                                                    textFieldValueDescriptionState.value =
+                                                        task.description
                                                 },
 
 
