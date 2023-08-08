@@ -1,6 +1,7 @@
-package com.example.module_3_lesson_1_hw_1_compose
+package com.example.module_3_lesson_1_hw_1_compose.threads
 
 import android.util.Log
+import com.example.module_3_lesson_1_hw_1_compose.App
 
 class DbThread(private val idItemClicked: Int, private val callback: DbThreadCallback): Runnable {
 

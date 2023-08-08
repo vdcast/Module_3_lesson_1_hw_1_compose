@@ -41,6 +41,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.module_3_lesson_1_hw_1_compose.data.Task
+import com.example.module_3_lesson_1_hw_1_compose.threads.DbThread
+import com.example.module_3_lesson_1_hw_1_compose.threads.DbThreadAddNewTask
+import com.example.module_3_lesson_1_hw_1_compose.threads.DbThreadAddNewTaskCallback
+import com.example.module_3_lesson_1_hw_1_compose.threads.DbThreadCallback
 import com.example.module_3_lesson_1_hw_1_compose.ui.theme.Mint10
 import com.example.module_3_lesson_1_hw_1_compose.ui.theme.Mint40
 import com.example.module_3_lesson_1_hw_1_compose.ui.theme.Mint90
@@ -49,16 +54,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-// Написать органайзер. На главном экране список дел (у каждого дела: тема, описание, время, и
-// возможность сделать важным и оно выделится в списке более другим цветом). Можно
-// создавать дела, редактировать, удалять.
-// Дела сохраняются в БД, т.е. не пропадают при новом запуске приложения
-
 
 class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCallback {
 
-
-    private val tasksState =  mutableStateOf(emptyList<Task>())
+    private val tasksState = mutableStateOf(emptyList<Task>())
     private val callbackNewTask: DbThreadAddNewTaskCallback = this
     private val callbackUpdatedTask: DbThreadCallback = this
 
@@ -66,49 +65,31 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-
             LaunchedEffect(Unit) {
-                    val tasks = withContext(Dispatchers.IO) {
-
-                        // code
-
-                        val db = App.instance.database
-                        val taskDao = db.taskDao
-                        val tasks = taskDao.allTask
-
-//                        updateTasksState()
-
-                        if (tasks.isNotEmpty()){
-                            Log.d("MYLOG", "${tasks[0].title} ${tasks[1].title}")
-
-                            tasksState.value = tasks
-                        } else {
-                            Log.d("MYLOG", " DB is empty.")
-                        }
-
-
-
-
+                val tasks = withContext(Dispatchers.IO) {
+                    val db = App.instance.database
+                    val taskDao = db.taskDao
+                    val tasks = taskDao.allTask
+                    if (tasks.isNotEmpty()) {
+                        Log.d("MYLOG", "${tasks[0].title} ${tasks[1].title}")
+                        tasksState.value = tasks
+                    } else {
+                        Log.d("MYLOG", " DB is empty.")
                     }
+                }
             }
 
-
-
-
             Box(modifier = Modifier.fillMaxSize()) {
-
-
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    itemsIndexed(tasksState.value){ index, task ->
-
-
+                    itemsIndexed(tasksState.value) { index, task ->
                         val isEditingState = remember { mutableStateOf(false) }
                         val textFieldValueTitleState = remember { mutableStateOf(task.title) }
                         val textFieldValueDescriptionState = remember { mutableStateOf(task.description) }
+                        val textFieldValueTimeHoursState = remember { mutableStateOf(task.timeHours) }
+                        val textFieldValueTimeMinutesState = remember { mutableStateOf(task.timeMinutes) }
 
                         val focusManager = LocalFocusManager.current
 
@@ -125,29 +106,25 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                 if (task.flagged) Mint40 else Mint10
                             ),
                             onClick = {
-                                if (!isEditingState.value){
+                                if (!isEditingState.value) {
                                     DbThread(task.id, callbackUpdatedTask)
                                 }
                                 focusManager.clearFocus()
                             }
                         ) {
-                            Box(){
+                            Box() {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxHeight()
                                 ) {
-
-
-                                    Column (
+                                    Column(
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         if (isEditingState.value) {
-
                                             TextField(
                                                 value = textFieldValueTitleState.value,
-                                                onValueChange = {newValue ->
+                                                onValueChange = { newValue ->
                                                     textFieldValueTitleState.value = newValue
-
                                                 },
                                                 keyboardOptions = KeyboardOptions(
                                                     imeAction = ImeAction.Done
@@ -161,10 +138,48 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     .padding(start = 24.dp),
                                                 textStyle = TextStyle(fontSize = 16.sp)
                                             )
-
+//                                                TextField(
+//                                                    value = textFieldValueTimeHoursState.value.toString(),
+//                                                    onValueChange = { newValue ->
+//                                                        textFieldValueTimeHoursState.value =
+//                                                            newValue.toInt()
+//                                                    },
+//                                                    keyboardOptions = KeyboardOptions(
+//                                                        imeAction = ImeAction.Done
+//                                                    ),
+//                                                    keyboardActions = KeyboardActions(
+//                                                        onDone = {
+//                                                            focusManager.clearFocus()
+//                                                        }
+//                                                    ),
+//                                                    modifier = Modifier
+//                                                        .padding(start = 12.dp)
+//                                                        .fillMaxWidth(0.3f),
+//                                                    textStyle = TextStyle(fontSize = 16.sp)
+//                                                )
+//                                                TextField(
+//                                                    value = textFieldValueTimeMinutesState.value.toString(),
+//                                                    onValueChange = { newValue ->
+//                                                        textFieldValueTimeMinutesState.value =
+//                                                            newValue.toInt()
+//
+//                                                    },
+//                                                    keyboardOptions = KeyboardOptions(
+//                                                        imeAction = ImeAction.Done
+//                                                    ),
+//                                                    keyboardActions = KeyboardActions(
+//                                                        onDone = {
+//                                                            focusManager.clearFocus()
+//                                                        }
+//                                                    ),
+//                                                    modifier = Modifier
+//                                                        .padding(start = 12.dp)
+//                                                        .fillMaxWidth(0.55f),
+//                                                    textStyle = TextStyle(fontSize = 16.sp)
+//                                                )
                                             TextField(
                                                 value = textFieldValueDescriptionState.value,
-                                                onValueChange = {newValue ->
+                                                onValueChange = { newValue ->
                                                     textFieldValueDescriptionState.value = newValue
 
                                                 },
@@ -195,13 +210,30 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                 style = TextStyle(fontSize = 12.sp)
                                             )
                                         }
-
-
-
                                     }
 
+                                    if (!isEditingState.value) {
+                                        Text(
+                                            text = tasksState.value[index].timeHours.toString(),
+                                            modifier = Modifier
+                                                .padding(end = 4.dp),
+                                            style = TextStyle(fontSize = 12.sp)
+                                        )
+                                        Text(
+                                            text = ":",
+                                            modifier = Modifier
+                                                .padding(end = 4.dp),
+                                            style = TextStyle(fontSize = 12.sp)
+                                        )
+                                        Text(
+                                            text = tasksState.value[index].timeMinutes.toString(),
+                                            modifier = Modifier
+                                                .padding(end = 16.dp),
+                                            style = TextStyle(fontSize = 12.sp)
+                                        )
+                                    }
 
-                                    if (!isEditingState.value){
+                                    if (!isEditingState.value) {
                                         Image(
                                             painter = painterResource(id = R.drawable.flag_6464),
                                             contentDescription = "flag",
@@ -212,13 +244,11 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                         )
                                     }
 
-
-
                                     if (isEditingState.value) {
                                         Column() {
                                             Image(
                                                 painter = painterResource(id = R.drawable.done),
-                                                contentDescription = "edit",
+                                                contentDescription = "save",
                                                 modifier = Modifier
                                                     .size(32.dp)
                                                     .offset(x = (-24).dp, y = 8.dp)
@@ -244,16 +274,11 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                                 updateTasksState()
                                                             }
                                                         }
-
                                                     },
-
-
-
                                                 )
-
                                             Image(
                                                 painter = painterResource(id = R.drawable.delete),
-                                                contentDescription = "edit",
+                                                contentDescription = "delete",
                                                 modifier = Modifier
                                                     .size(32.dp)
                                                     .offset(x = (-24).dp, y = (-8).dp)
@@ -269,9 +294,6 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                             }
                                                         }
                                                     },
-
-
-
                                                 )
                                         }
                                     } else {
@@ -288,87 +310,57 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
                                                     textFieldValueDescriptionState.value =
                                                         task.description
                                                 },
-
-
-
                                             )
                                     }
-
-
-
                                 }
                             }
 
                         }
                     }
                 }
-
                 AddButton(
                     Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 24.dp, bottom = 24.dp),
                     callbackNewTask
                 )
-
-
             }
-
-
         }
-
     }
 
     private fun updateTitle(idItemClicked: Int, newTitle: String) {
         var db = App.instance.database
         var taskDao = db.taskDao
-
         val itemById = taskDao.getById(idItemClicked)
-
         itemById.title = newTitle
-
         taskDao.update(itemById)
-
     }
 
     private fun updateDescription(idItemClicked: Int, newDescription: String) {
         var db = App.instance.database
         var taskDao = db.taskDao
-
         val itemById = taskDao.getById(idItemClicked)
-
         itemById.description = newDescription
-
         taskDao.update(itemById)
-
     }
 
     private fun deleteTask(idItemClicked: Int) {
         var db = App.instance.database
         var taskDao = db.taskDao
-
         val itemById = taskDao.getById(idItemClicked)
-
         taskDao.delete(itemById)
-
     }
 
     private fun updateTasksState() {
         val db = App.instance.database
         val taskDao = db.taskDao
         val tasks = taskDao.allTask
-
         tasksState.value = tasks
-
     }
-
-
-
 
     override fun onTaskAdded(task: Task) {
         updateTasksState()
     }
-
-
 
     override fun onTaskUpdated(task: Task) {
         updateTasksState()
@@ -376,24 +368,16 @@ class MainActivity : ComponentActivity(), DbThreadAddNewTaskCallback, DbThreadCa
 }
 
 
-
-
-
 @Composable
 fun AddButton(modifier: Modifier, dbThreadAddNewTaskCallback: DbThreadAddNewTaskCallback) {
     Button(
         onClick = {
-
-
-                  DbThreadAddNewTask(dbThreadAddNewTaskCallback)
-
-
+            DbThreadAddNewTask(dbThreadAddNewTaskCallback)
         },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(Mint90),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-    ){
+    ) {
         Text(text = "Add")
-
     }
 }

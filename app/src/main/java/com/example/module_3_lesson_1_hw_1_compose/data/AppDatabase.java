@@ -1,4 +1,4 @@
-package com.example.module_3_lesson_1_hw_1_compose;
+package com.example.module_3_lesson_1_hw_1_compose.data;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
