@@ -12,4 +12,4 @@ Cases are saved in the database, do not disappear when the application is launch
 
 **Result: Screen recoding** (please, note that it was converted to GIF, so it's not smooth as it was):
 
-![Module_3_lesson_1_hw_1_compose](https://github.com/vdcast/Module_3_lesson_1_hw_1_compose/assets/108469609/1529cfa6-88b3-4865-b3c4-a68a3ff447c4)
+![Module_3_lesson_1_hw_1_compose](https://github.com/vdcast/Module_3_lesson_1_hw_1_compose/assets/108469609/99b8e104-b2d2-43a2-ae5d-2b873735678a)
